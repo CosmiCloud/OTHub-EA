@@ -8,7 +8,7 @@ Update the HOST_URL environment variable in GCP to switch back and forth from te
 
 You will need to run a chainlink node to hose the APIs yourself or you will need to wait until the adapter is listed on the Kovan adapter market place.
 
-## Creating your own adapter from this template
+## Run your own adapter
 
 Clone this repo 
 
