@@ -1,19 +1,25 @@
-# Chainlink NodeJS External Adapter Template
+# OTHub Chainlink External Adapter
 
-This template provides a basic framework for developing Chainlink external adapters in NodeJS. Comments are included to assist with development and testing of the external adapter. Once the API-specific values (like query parameters and API key authentication) have been added to the adapter, it is very easy to add some tests to verify that the data will be correctly formatted when returned to the Chainlink node. There is no need to use any additional frameworks or to run a Chainlink node in order to test the adapter.
+This chainlink adapter allows you to request data from most of the APIs provided by https://othub-testnet.origin-trail.network/dashboard and use them on chain.
+
+OTHub API documentation can be found here: https://testnet-api.othub.info/docs/index.html
+
+Update the HOST_URL environment variable in GCP to switch back and forth from testnet to mainnet or to your own host url.
+
+You will need to run a chainlink node to hose the APIs yourself or you will need to wait until the adapter is listed on the Kovan adapter market place.
 
 ## Creating your own adapter from this template
 
-Clone this repo and change "ExternalAdapterProject" below to the name of your project
+Clone this repo 
 
 ```bash
-git clone https://github.com/thodges-gh/CL-EA-NodeJS-Template.git ExternalAdapterProject
+git clone https://github.com/CosmiCloud/OTHub-EA.git
 ```
 
 Enter into the newly-created directory
 
 ```bash
-cd ExternalAdapterProject
+cd OTHub-EA
 ```
 
 You can remove the existing git history by running:
@@ -26,21 +32,52 @@ See [Install Locally](#install-locally) for a quickstart
 
 ## Input Params
 
-- `base`, `from`, or `coin`: The symbol of the currency to query
-- `quote`, `to`, or `market`: The symbol of the currency to convert to
+- ALL input params available in the othub api documentation are compatible with the adapter.
 
-## Output
+## Example Output
 
-```json
-{
- "jobRunID": "278c97ffadb54a5bbb93cfec5f7b5503",
- "data": {
-  "USD": 164.02,
-  "result": 164.02
- },
- "statusCode": 200
+```bash
+Result:  {
+  jobRunID: '1',
+  data: [
+    {
+      Identity: '0x77cb90599e850a6ab5a1d85f222b813c689bb9fc',
+      OfferId: '0x3afb601c5260094ec6522257ccbb80882ea9ac5134135f57595c70a3fae07538',
+      FinalizedTimestamp: '2021-01-06T03:07:49',
+      HoldingTimeInMinutes: 60,
+      Paidout: false,
+      CanPayout: true,
+      TokenAmountPerHolder: '120.429168673134480000',
+      EndTimestamp: '2021-01-06T04:07:49',
+      Status: 'Completed',
+      IsOriginalHolder: true
+    },
+    result: 'Completed'
+  ],
+  result: 'Completed',
+  statusCode: 200
 }
 ```
+
+## Supported APIs
+
+- getHoldingAddress
+- getHoldingAddresses
+- getHoldingStorageAddresses
+- getLitigationStorageAddresses
+- getDC
+- getDataCreators
+- getDCJobs
+- getDCProfileTransfers
+- getDCLitigations
+- getDataHolders
+- getDH
+- getDHJobs
+- getDHPayouts
+- getDHProfileTransfers
+- getDHLitigations
+- getCanTryPayout
+- getJob
 
 ## Install Locally
 
@@ -69,21 +106,22 @@ yarn start
 ## Call the external adapter/API server
 
 ```bash
-curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": { "from": "ETH", "to": "USD" } }'
+sudo curl -X POST -H "content-type:application/json" "http://localhost:8080/" --data '{ "id": 0, "data": { "action": "getDHJobs", "value": "Status", "dh_erc725_id": "0x77cb90599e850a6ab5a1d85f222b813c689bb9fc", "limit": "1", "page": "1", "OfferId_like": "0x3afb601c5260094ec6522257ccbb80882ea9ac5134135f57595c70a3fae07538" } }'
 ```
 
 ## Docker
 
-If you wish to use Docker to run the adapter, you can build the image by running the following command:
+If you wish to use Docker to run the adapter, you can build the image by running the following commands:
 
 ```bash
-docker build . -t external-adapter
+cd OTHub-EA
+sudo docker build . -t othub-ea
 ```
 
 Then run it with:
 
 ```bash
-docker run -p 8080:8080 -it external-adapter:latest
+sudo docker run --name othub-ea -p 8080:8080 -it othub-ea:latest
 ```
 
 ## Serverless hosts
@@ -93,65 +131,44 @@ After [installing locally](#install-locally):
 ### Create the zip
 
 ```bash
-zip -r external-adapter.zip .
+sudo zip -r othub-ea.zip .
 ```
-
-### Install to AWS Lambda
-
-- In Lambda Functions, create function
-- On the Create function page:
-  - Give the function a name
-  - Use Node.js 12.x for the runtime
-  - Choose an existing role or create a new one
-  - Click Create Function
-- Under Function code, select "Upload a .zip file" from the Code entry type drop-down
-- Click Upload and select the `external-adapter.zip` file
-- Handler:
-    - index.handler for REST API Gateways
-    - index.handlerv2 for HTTP API Gateways
-- Add the environment variable (repeat for all environment variables):
-  - Key: API_KEY
-  - Value: Your_API_key
-- Save
-
-#### To Set Up an API Gateway (HTTP API)
-
-If using a HTTP API Gateway, Lambda's built-in Test will fail, but you will be able to externally call the function successfully.
-
-- Click Add Trigger
-- Select API Gateway in Trigger configuration
-- Under API, click Create an API
-- Choose HTTP API
-- Select the security for the API
-- Click Add
-
-#### To Set Up an API Gateway (REST API)
-
-If using a REST API Gateway, you will need to disable the Lambda proxy integration for Lambda-based adapter to function.
-
-- Click Add Trigger
-- Select API Gateway in Trigger configuration
-- Under API, click Create an API
-- Choose REST API
-- Select the security for the API
-- Click Add
-- Click the API Gateway trigger
-- Click the name of the trigger (this is a link, a new window opens)
-- Click Integration Request
-- Uncheck Use Lamba Proxy integration
-- Click OK on the two dialogs
-- Return to your function
-- Remove the API Gateway and Save
-- Click Add Trigger and use the same API Gateway
-- Select the deployment stage and security
-- Click Add
 
 ### Install to GCP
 
 - In Functions, create a new function, choose to ZIP upload
-- Click Browse and select the `external-adapter.zip` file
+- Click Browse and select the `othub-ea.zip` file
 - Select a Storage Bucket to keep the zip in
 - Function to execute: gcpservice
 - Click More, Add variable (repeat for all environment variables)
-  - NAME: API_KEY
-  - VALUE: Your_API_key
+  - NAME: HOST_URL
+  - VALUE: "your host url* 
+  (testnet = https://testnet-api.othub.info, mainnet = https://othub-api.origin-trail.network, or you can potentially use your own custom url if hosting othub apis)
+
+### Chainlink Node Quick Start
+
+see: https://docs.chain.link/docs/running-a-chainlink-node for more details on adding jobs/bridges to your GCP function.
+
+sudo mkdir -p ~/.chainlink-kovan
+cd ~/.chainlink-kovan
+
+sudo nano .env
+
+"ROOT=/chainlink
+LOG_LEVEL=debug
+ETH_CHAIN_ID=42
+MIN_OUTGOING_CONFIRMATIONS=2
+LINK_CONTRACT_ADDRESS=0xa36085F69e2889c224210F603D836748e7dC0088
+CHAINLINK_TLS_PORT=0
+SECURE_COOKIES=false
+GAS_UPDATER_ENABLED=true
+MINIMUM_CONTRACT_PAYMENT=10000000000000000
+ALLOW_ORIGINS=*"
+ETH_URL=wss://kovan.infura.io/ws/v3/*your infura endpoint ID here*
+DATABASE_URL=postgresql://admin:admin@0.0.0.0:5432/chainlink_db?sslmode=disable
+
+sudo docker run --name chainlink_db -p 5432:5432 -e POSTGRES_PASSWORD=admin -e POSTGRES_USER=admin -e POSTGRES_DB=chainlink_db -d postgres
+
+sudo docker exec -it chainlink_db psql -U admin postgres
+
+cd ~/.chainlink-kovan && sudo docker run --name chainlink_node -p 6688:6688 -v ~/.chainlink-kovan:/chainlink -it --network host --env-file=.env smartcontract/chainlink:0.9.4 local n 
