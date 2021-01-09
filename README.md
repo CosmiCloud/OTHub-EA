@@ -6,7 +6,7 @@ OTHub API documentation can be found here: https://testnet-api.othub.info/docs/i
 
 Update the HOST_URL environment variable in GCP to switch back and forth from testnet to mainnet or to your own host url.
 
-You will need to run a chainlink node to hose the APIs yourself or you will need to wait until the adapter is listed on the Kovan adapter market place.
+You will need to run a chainlink node to host the APIs yourself or you will need to wait until the adapter is listed on the Kovan adapter market place.
 
 ## Run your own adapter
 
